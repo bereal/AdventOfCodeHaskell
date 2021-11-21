@@ -1,0 +1,47 @@
+name: AdventOfCode
+version: 0.1.0.0
+license: BSD3
+
+extra-source-files:
+  - README.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+
+dependencies:
+  - base >= 4.7 && < 5
+  - attoparsec
+  - bytestring
+  - containers
+  - directory
+  - exceptions
+  - filepath
+  - http-client
+  - http-client-tls
+  - http-types
+  - text
+  - time
+
+library:
+  source-dirs: src
+  default-extensions:
+    - MultiWayIf
+    - OverloadedStrings
+    - RecordWildCards
+    - ScopedTypeVariables
+
+executables:
+  AdventOfCode2021-exe:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - AdventOfCode
