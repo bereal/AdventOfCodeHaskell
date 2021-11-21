@@ -24,6 +24,7 @@ dependencies:
   - http-client
   - http-client-tls
   - http-types
+  - optparse-applicative
   - text
   - time
 

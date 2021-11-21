@@ -24,7 +24,7 @@ parseInput parser input = case parser of
     Right a -> a
   (TextParser p) -> p input
 
-skipDay _ = putStrLn "Day is not solved yet"
+skipDay _ = putStrLn "No solution"
 
 solveDay :: (Show b, Show c) => InputParser a -> (a -> b) -> (a -> c) -> DayRunner
 solveDay parser p1 p2 input = do
