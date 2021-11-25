@@ -10,11 +10,13 @@ import Debug.Trace (trace)
 
 data ProgramState = ProgramState
   { ptr :: Int,
-    halted :: Bool,
+    state :: State,
     memory :: V.Vector Int,
     input :: [Int],
     output :: [Int]
   }
+
+data State = Running | Halt | Waiting deriving (Eq)
 
 type AddrMode = Int
 
@@ -27,7 +29,7 @@ parseCommand c =
    in (code, mode1, mode2, mode3)
 
 initProgram :: [Int] -> ProgramState
-initProgram p = ProgramState 0 False (V.fromList p) [] []
+initProgram p = ProgramState 0 Running (V.fromList p) [] []
 
 patchMem :: [(Int, Int)] -> ProgramState -> ProgramState
 patchMem upd ps@ProgramState {memory} =
@@ -43,7 +45,7 @@ runStep s@ProgramState {ptr, memory} = case parseCommand (memory ! ptr) of
   (6, m1, m2, _) -> jumpIf (== 0) (m1, m2) s
   (7, m1, m2, _) -> check (<) (m1, m2) s
   (8, m1, m2, _) -> check (==) (m1, m2) s
-  (99, _, _, _) -> s {halted = True}
+  (99, _, _, _) -> s {state = Halt}
 
 evalArg :: AddrMode -> Int -> ProgramState -> Int
 evalArg 0 v ProgramState {memory, ptr} = memory ! (memory ! (ptr + v))
@@ -52,6 +54,7 @@ evalArg 1 v ProgramState {memory, ptr} = memory ! (ptr + v)
 readInput p@ProgramState {input = (i : is), ptr, memory} =
   let addr = evalArg 1 1 p
    in p {input = is, ptr = ptr + 2, memory = memory // [(addr, i)]}
+readInput p@ProgramState {input = []} = p {state = Waiting}
 
 writeOutput m p@ProgramState {..} =
   let addr = evalArg 1 1 p
@@ -79,11 +82,11 @@ binOp op (m1, m2, _) p@ProgramState {ptr, memory} =
 
 runProgram :: ProgramState -> ProgramState
 runProgram s =
-  let s'@ProgramState {ptr, halted} = runStep s
-   in if halted then s' else runProgram s'
+  let s'@ProgramState {ptr, state} = runStep s
+   in if state == Running then runProgram s' else s'
 
 runProgramWithArgs :: Int -> Int -> ProgramState -> ProgramState
 runProgramWithArgs a b p = let p' = patchMem [(1, a), (2, b)] p in runProgram p'
 
 runProgramWithInput :: [Int] -> ProgramState -> ProgramState
-runProgramWithInput i p = runProgram $ p {input = i}
+runProgramWithInput i p@ProgramState {input} = runProgram $ p {input = input ++ i}
