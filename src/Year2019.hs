@@ -4,5 +4,6 @@ import Client (ClientConfig, downloadInput)
 import qualified Year2019.Day01 as Day01
 import qualified Year2019.Day02 as Day02
 import qualified Year2019.Day03 as Day03
+import qualified Year2019.Day04 as Day04
 
-days = [Day01.solve, Day02.solve, Day03.solve]
+days = [Day01.solve, Day02.solve, Day03.solve, Day04.solve]
