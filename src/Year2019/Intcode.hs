@@ -8,32 +8,82 @@ import Data.Vector ((!), (//))
 import qualified Data.Vector as V
 import Debug.Trace (trace)
 
-data ProgramState = ProgramState {ptr :: Int, halted :: Bool, memory :: V.Vector Int}
+data ProgramState = ProgramState
+  { ptr :: Int,
+    halted :: Bool,
+    memory :: V.Vector Int,
+    input :: [Int],
+    output :: [Int]
+  }
+
+type AddrMode = Int
+
+parseCommand :: Int -> (Int, AddrMode, AddrMode, AddrMode)
+parseCommand c =
+  let (c1, code) = c `divMod` 100
+      (c2, mode1) = c1 `divMod` 10
+      (c3, mode2) = c2 `divMod` 10
+      mode3 = c3 `div` 10
+   in (code, mode1, mode2, mode3)
 
 initProgram :: [Int] -> ProgramState
-initProgram p = ProgramState 0 False $ V.fromList p
+initProgram p = ProgramState 0 False (V.fromList p) [] []
 
 patchMem :: [(Int, Int)] -> ProgramState -> ProgramState
 patchMem upd ps@ProgramState {memory} =
   let m' = memory // upd in ps {memory = m'}
 
 runStep :: ProgramState -> ProgramState
-runStep s@ProgramState {ptr, memory} = case memory ! ptr of
-  1 -> binOp (+) s
-  2 -> binOp (*) s
-  99 -> s {halted = True}
+runStep s@ProgramState {ptr, memory} = case parseCommand (memory ! ptr) of
+  (1, m1, m2, m3) -> binOp (+) (m1, m2, m3) s
+  (2, m1, m2, m3) -> binOp (*) (m1, m2, m3) s
+  (3, _, _, _) -> readInput s
+  (4, m, _, _) -> writeOutput m s
+  (5, m1, m2, _) -> jumpIf (/= 0) (m1, m2) s
+  (6, m1, m2, _) -> jumpIf (== 0) (m1, m2) s
+  (7, m1, m2, _) -> check (<) (m1, m2) s
+  (8, m1, m2, _) -> check (==) (m1, m2) s
+  (99, _, _, _) -> s {halted = True}
 
-binOp :: (Int -> Int -> Int) -> ProgramState -> ProgramState
-binOp op s@ProgramState {ptr, memory} =
-  let a1 = memory ! (memory ! (ptr + 1))
-      a2 = memory ! (memory ! (ptr + 2))
-      d = memory ! (ptr + 3)
+evalArg :: AddrMode -> Int -> ProgramState -> Int
+evalArg 0 v ProgramState {memory, ptr} = memory ! (memory ! (ptr + v))
+evalArg 1 v ProgramState {memory, ptr} = memory ! (ptr + v)
+
+readInput p@ProgramState {input = (i : is), ptr, memory} =
+  let addr = evalArg 1 1 p
+   in p {input = is, ptr = ptr + 2, memory = memory // [(addr, i)]}
+
+writeOutput m p@ProgramState {..} =
+  let addr = evalArg 1 1 p
+   in p {ptr = ptr + 2, output = (memory ! addr) : output}
+
+jumpIf cond (m1, m2) p@ProgramState {..} =
+  let v = evalArg m1 1 p
+      ptr' = if cond v then evalArg m2 2 p else ptr + 3
+   in p {ptr = ptr'}
+
+check cond (m1, m2) p@ProgramState {..} =
+  let v1 = evalArg m1 1 p
+      v2 = evalArg m2 2 p
+      addr = evalArg 1 3 p
+      v = if v1 `cond` v2 then 1 else 0
+   in p {ptr = ptr + 4, memory = memory // [(addr, v)]}
+
+binOp :: (Int -> Int -> Int) -> (AddrMode, AddrMode, AddrMode) -> ProgramState -> ProgramState
+binOp op (m1, m2, _) p@ProgramState {ptr, memory} =
+  let a1 = evalArg m1 1 p
+      a2 = evalArg m2 2 p
+      d = evalArg 1 3 p
       mem' = memory // [(d, a1 `op` a2)]
-   in s {ptr = ptr + 4, memory = mem'}
+   in p {ptr = ptr + 4, memory = mem'}
 
-runProgram :: ProgramState -> Int
+runProgram :: ProgramState -> ProgramState
 runProgram s =
-  let s'@ProgramState {halted, memory} = runStep s in if halted then memory ! 0 else runProgram s'
+  let s'@ProgramState {ptr, halted} = runStep s
+   in if halted then s' else runProgram s'
 
-runProgramWithArgs :: Int -> Int -> ProgramState -> Int
+runProgramWithArgs :: Int -> Int -> ProgramState -> ProgramState
 runProgramWithArgs a b p = let p' = patchMem [(1, a), (2, b)] p in runProgram p'
+
+runProgramWithInput :: [Int] -> ProgramState -> ProgramState
+runProgramWithInput i p = runProgram $ p {input = i}
