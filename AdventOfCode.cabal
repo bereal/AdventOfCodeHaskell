@@ -15,6 +15,13 @@ library
   exposed-modules:
       Client
       Common
+      Year2019
+      Year2019.Day01
+      Year2019.Day02
+      Year2019.Day03
+      Year2019.Intcode
+      Year2020
+      Year2020.Day01
       Year2021
       Year2021.Day01
       Year2021.Day02
@@ -58,12 +65,16 @@ library
     , directory
     , exceptions
     , filepath
+    , hashable
     , http-client
     , http-client-tls
     , http-types
     , optparse-applicative
+    , template-haskell
     , text
     , time
+    , unordered-containers
+    , vector
   default-language: Haskell2010
 
 executable AdventOfCode2021-exe
@@ -82,10 +93,14 @@ executable AdventOfCode2021-exe
     , directory
     , exceptions
     , filepath
+    , hashable
     , http-client
     , http-client-tls
     , http-types
     , optparse-applicative
+    , template-haskell
     , text
     , time
+    , unordered-containers
+    , vector
   default-language: Haskell2010

@@ -21,12 +21,16 @@ dependencies:
   - directory
   - exceptions
   - filepath
+  - hashable
   - http-client
   - http-client-tls
   - http-types
   - optparse-applicative
+  - template-haskell
   - text
   - time
+  - unordered-containers
+  - vector
 
 library:
   source-dirs: src

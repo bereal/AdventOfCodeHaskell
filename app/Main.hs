@@ -14,18 +14,23 @@ import Options.Applicative
     eitherReader,
     execParser,
     fullDesc,
+    helper,
     info,
     long,
+    metavar,
     option,
     short,
     value,
+    (<**>),
   )
 import System.Environment (getArgs)
 import Text.Printf (printf)
 import Text.Read (readEither)
+import qualified Year2019
+import qualified Year2020
 import qualified Year2021
 
-years = M.fromList [(2021, Year2021.days)]
+years = M.fromList [(2019, Year2019.days), (2020, Year2020.days), (2021, Year2021.days)]
 
 run config year day = do
   let yearDays = years ! year
@@ -46,13 +51,13 @@ optionalReader = eitherReader (fmap Just . readEither)
 flagParser :: Parser ParsedFlags
 flagParser =
   ParsedFlags
-    <$> option optionalReader (short 'b' <> long "basedir" <> value Nothing)
-    <*> option auto (short 'y' <> long "year" <> value 2021)
-    <*> option optionalReader (short 'd' <> long "day" <> value Nothing)
+    <$> option optionalReader (short 'b' <> long "basedir" <> value Nothing <> metavar "DIRECTORY")
+    <*> option auto (short 'y' <> long "year" <> value 2021 <> metavar "YEAR")
+    <*> option optionalReader (short 'd' <> long "day" <> value Nothing <> metavar "DAY")
 
 parseFlags = do
   args <- getArgs
-  execParser $ info flagParser fullDesc
+  execParser $ info (flagParser <**> helper) fullDesc
 
 main = do
   args <- getArgs
