@@ -3,87 +3,96 @@
 
 module Year2019.Intcode where
 
+import Data.IntMap ((!))
 import qualified Data.IntMap as IM
-import Data.Vector ((!), (//))
-import qualified Data.Vector as V
+import Data.Maybe (fromMaybe)
 import Debug.Trace (trace)
 import Text.Printf (printf)
+
+type Memory = IM.IntMap Int
 
 data ProgramState = ProgramState
   { ptr :: Int,
     state :: State,
-    memory :: V.Vector Int,
+    memory :: Memory,
     input :: [Int],
     output :: [Int],
+    base :: Int,
     name :: String
   }
 
 instance Show ProgramState where
-  show ProgramState {name, state, input, ptr} = printf "Program %s {state %s, input %s, ptr %d}" name (show state) (show input) ptr
+  show ProgramState {name, state, input, ptr, base} =
+    printf "Program %s {state %s, input %s, ptr %d, base %d}" name (show state) (show input) ptr base
 
 data State = Running | Halt | Waiting deriving (Eq, Show)
 
 type AddrMode = Int
 
+(!?) :: ProgramState -> Int -> Int
+(!?) ProgramState {memory} i = fromMaybe 0 (IM.lookup i memory)
+
 parseCommand :: Int -> (Int, AddrMode, AddrMode, AddrMode)
 parseCommand c =
   let (c1, code) = c `divMod` 100
       (c2, mode1) = c1 `divMod` 10
-      (c3, mode2) = c2 `divMod` 10
-      mode3 = c3 `div` 10
+      (mode3, mode2) = c2 `divMod` 10
    in (code, mode1, mode2, mode3)
 
 initProgram :: [Int] -> ProgramState
-initProgram p = ProgramState 0 Running (V.fromList p) [] [] ""
+initProgram p = ProgramState 0 Running (IM.fromAscList $ zip [0 ..] p) [] [] 0 ""
 
 patchMem :: [(Int, Int)] -> ProgramState -> ProgramState
 patchMem upd ps@ProgramState {memory} =
-  let m' = memory // upd in ps {memory = m'}
+  let m' = IM.union (IM.fromList upd) memory in ps {memory = m'}
+
+boolOp :: (Int -> Int -> Bool) -> Int -> Int -> Int
+boolOp f a b = if f a b then 1 else 0
 
 runStep :: ProgramState -> ProgramState
 runStep s@ProgramState {ptr, memory} = case parseCommand (memory ! ptr) of
   (1, m1, m2, m3) -> binOp (+) (m1, m2, m3) s
   (2, m1, m2, m3) -> binOp (*) (m1, m2, m3) s
-  (3, _, _, _) -> readInput s
+  (3, m, _, _) -> readInput m s
   (4, m, _, _) -> writeOutput m s
   (5, m1, m2, _) -> jumpIf (/= 0) (m1, m2) s
   (6, m1, m2, _) -> jumpIf (== 0) (m1, m2) s
-  (7, m1, m2, _) -> check (<) (m1, m2) s
-  (8, m1, m2, _) -> check (==) (m1, m2) s
+  (7, m1, m2, m3) -> binOp (boolOp (<)) (m1, m2, m3) s
+  (8, m1, m2, m3) -> binOp (boolOp (==)) (m1, m2, m3) s
+  (9, m, _, _) -> setBase m s
   (99, _, _, _) -> s {state = Halt}
 
-evalArg :: AddrMode -> Int -> ProgramState -> Int
-evalArg 0 v ProgramState {memory, ptr} = memory ! (memory ! (ptr + v))
-evalArg 1 v ProgramState {memory, ptr} = memory ! (ptr + v)
+evalAddr :: AddrMode -> Int -> ProgramState -> Int
+evalAddr 0 v p@ProgramState {ptr} = p !? (ptr + v)
+evalAddr 1 v ProgramState {ptr} = ptr + v
+evalAddr 2 v p@ProgramState {ptr, base} = base + (p !? (ptr + v))
 
-readInput p@ProgramState {input = (i : is), ptr, memory} =
-  let addr = evalArg 1 1 p
-   in p {input = is, ptr = ptr + 2, memory = memory // [(addr, i)]}
-readInput p@ProgramState {input = []} = p {state = Waiting}
+readInput m p@ProgramState {input = (i : is), ptr, memory} =
+  let addr = evalAddr m 1 p
+   in p {input = is, ptr = ptr + 2, memory = IM.insert addr i memory}
+readInput _ p@ProgramState {input = []} = p {state = Waiting}
 
 writeOutput m p@ProgramState {..} =
-  let addr = evalArg 1 1 p
-   in p {ptr = ptr + 2, output = (memory ! addr) : output}
+  let addr = evalAddr m 1 p
+   in p {ptr = ptr + 2, output = p !? addr : output}
 
 jumpIf cond (m1, m2) p@ProgramState {..} =
-  let v = evalArg m1 1 p
-      ptr' = if cond v then evalArg m2 2 p else ptr + 3
+  let v = p !? evalAddr m1 1 p
+      ptr' = if cond v then p !? evalAddr m2 2 p else ptr + 3
    in p {ptr = ptr'}
 
-check cond (m1, m2) p@ProgramState {..} =
-  let v1 = evalArg m1 1 p
-      v2 = evalArg m2 2 p
-      addr = evalArg 1 3 p
-      v = if v1 `cond` v2 then 1 else 0
-   in p {ptr = ptr + 4, memory = memory // [(addr, v)]}
-
 binOp :: (Int -> Int -> Int) -> (AddrMode, AddrMode, AddrMode) -> ProgramState -> ProgramState
-binOp op (m1, m2, _) p@ProgramState {ptr, memory} =
-  let a1 = evalArg m1 1 p
-      a2 = evalArg m2 2 p
-      d = evalArg 1 3 p
-      mem' = memory // [(d, a1 `op` a2)]
+binOp op (m1, m2, m3) p@ProgramState {ptr, memory} =
+  let a1 = p !? evalAddr m1 1 p
+      a2 = p !? evalAddr m2 2 p
+      d = evalAddr m3 3 p
+      v = a1 `op` a2
+      mem' = IM.insert d v memory
    in p {ptr = ptr + 4, memory = mem'}
+
+setBase m p@ProgramState {memory, ptr, base} =
+  let upd = p !? evalAddr m 1 p
+   in p {base = base + upd, ptr = ptr + 2}
 
 runProgram :: ProgramState -> ProgramState
 runProgram s =
