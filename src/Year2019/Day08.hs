@@ -1,0 +1,44 @@
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+
+module Year2019.Day08 where
+
+import Common (Input, InputParser (ParsecParser, TextParser), solveDay)
+import Data.Attoparsec.Text (digit, many1)
+import Data.Char (digitToInt)
+import Data.List (intercalate)
+import Data.List.Split (chunksOf)
+
+width = 25
+
+height = 6
+
+newtype Image = Image [Int]
+
+instance Show Image where
+  show (Image pixels) = '\n' : (intercalate "\n" $ map (map showPixel) $ chunksOf width pixels)
+    where
+      showPixel 0 = ' '
+      showPixel 1 = '*'
+
+parser = ParsecParser $ chunksOf (width * height) <$> many1 (digitToInt <$> digit)
+
+getLayerStat = foldl f (0, 0, 0)
+  where
+    f (z, o, t) 0 = (z + 1, o, t)
+    f (z, o, t) 1 = (z, o + 1, t)
+    f (z, o, t) 2 = (z, o, t + 1)
+
+mergePixels 0 _ = 0
+mergePixels 1 _ = 1
+mergePixels 2 c = c
+
+mergeLayers = zipWith mergePixels
+
+solve1 ls =
+  let stats = map getLayerStat ls
+      (z, o, t) = minimum stats
+   in ((z, o, t), o * t)
+
+solve2 = Image . foldl1 mergeLayers
+
+solve = solveDay parser solve1 solve2

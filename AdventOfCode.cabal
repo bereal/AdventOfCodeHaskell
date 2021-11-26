@@ -23,6 +23,7 @@ library
       Year2019.Day05
       Year2019.Day06
       Year2019.Day07
+      Year2019.Day08
       Year2019.Intcode
       Year2020
       Year2020.Day01
@@ -74,6 +75,7 @@ library
     , http-client-tls
     , http-types
     , optparse-applicative
+    , split
     , template-haskell
     , text
     , time
@@ -102,6 +104,7 @@ executable AdventOfCode2021-exe
     , http-client-tls
     , http-types
     , optparse-applicative
+    , split
     , template-haskell
     , text
     , time

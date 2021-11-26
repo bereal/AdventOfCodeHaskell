@@ -26,6 +26,7 @@ dependencies:
   - http-client-tls
   - http-types
   - optparse-applicative
+  - split
   - template-haskell
   - text
   - time
