@@ -7,16 +7,21 @@ import qualified Data.IntMap as IM
 import Data.Vector ((!), (//))
 import qualified Data.Vector as V
 import Debug.Trace (trace)
+import Text.Printf (printf)
 
 data ProgramState = ProgramState
   { ptr :: Int,
     state :: State,
     memory :: V.Vector Int,
     input :: [Int],
-    output :: [Int]
+    output :: [Int],
+    name :: String
   }
 
-data State = Running | Halt | Waiting deriving (Eq)
+instance Show ProgramState where
+  show ProgramState {name, state, input, ptr} = printf "Program %s {state %s, input %s, ptr %d}" name (show state) (show input) ptr
+
+data State = Running | Halt | Waiting deriving (Eq, Show)
 
 type AddrMode = Int
 
@@ -29,7 +34,7 @@ parseCommand c =
    in (code, mode1, mode2, mode3)
 
 initProgram :: [Int] -> ProgramState
-initProgram p = ProgramState 0 Running (V.fromList p) [] []
+initProgram p = ProgramState 0 Running (V.fromList p) [] [] ""
 
 patchMem :: [(Int, Int)] -> ProgramState -> ProgramState
 patchMem upd ps@ProgramState {memory} =
@@ -89,4 +94,4 @@ runProgramWithArgs :: Int -> Int -> ProgramState -> ProgramState
 runProgramWithArgs a b p = let p' = patchMem [(1, a), (2, b)] p in runProgram p'
 
 runProgramWithInput :: [Int] -> ProgramState -> ProgramState
-runProgramWithInput i p@ProgramState {input} = runProgram $ p {input = input ++ i}
+runProgramWithInput i p@ProgramState {input} = runProgram $ p {input = input ++ i, state = Running}

@@ -8,7 +8,7 @@ import Data.Text (Text, pack)
 import GHC.Clock (getMonotonicTime)
 import Text.Printf (printf)
 
-data InputParser a = ParsecParser (Parser a) | TextParser (Text -> a)
+data InputParser a = ParsecParser (Parser a) | TextParser (Text -> Either String a) | HardCoded a
 
 data Input = HTTPInput ClientConfig Int Int
 
@@ -18,11 +18,14 @@ readInput :: Input -> IO Text
 readInput (HTTPInput config year day) = downloadInput config year day
 
 parseInput :: InputParser a -> Text -> a
-parseInput parser input = case parser of
-  (ParsecParser p) -> case parseOnly p input of
-    Left err -> error err
-    Right a -> a
-  (TextParser p) -> p input
+parseInput parser input =
+  let result = case parser of
+        (ParsecParser p) -> parseOnly p input
+        (TextParser p) -> p input
+        (HardCoded a) -> Right a
+   in case result of
+        Left err -> error err
+        Right a -> a
 
 skipDay _ = putStrLn "No solution"
 
