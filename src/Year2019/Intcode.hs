@@ -103,4 +103,4 @@ runProgramWithArgs :: Int -> Int -> ProgramState -> ProgramState
 runProgramWithArgs a b p = let p' = patchMem [(1, a), (2, b)] p in runProgram p'
 
 runProgramWithInput :: [Int] -> ProgramState -> ProgramState
-runProgramWithInput i p@ProgramState {input} = runProgram $ p {input = input ++ i, state = Running}
+runProgramWithInput i p@ProgramState {input} = runProgram $ p {output = [], input = input ++ i, state = Running}
