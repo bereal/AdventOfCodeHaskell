@@ -13,6 +13,7 @@ import qualified Year2019.Day08 as Day08
 import qualified Year2019.Day09 as Day09
 import qualified Year2019.Day11 as Day11
 import qualified Year2019.Day12 as Day12
+import qualified Year2019.Day13 as Day13
 
 days =
   [ Day01.solve,
@@ -26,5 +27,6 @@ days =
     Day09.solve,
     skipDay,
     Day11.solve,
-    Day12.solve
+    Day12.solve,
+    Day13.solve
   ]
