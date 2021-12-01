@@ -5,11 +5,9 @@ import Data.Attoparsec.Text (decimal, endOfLine, sepBy1)
 
 parser = ParsecParser $ sepBy1 decimal endOfLine
 
-solve1 xs = length $ filter (< 0) $ zipWith (-) xs $ tail xs
+-- How it works:
+-- https://eli.thegreenplace.net/2018/haskell-functions-as-functors-applicatives-and-monads
+countIncreases :: Int -> [Int] -> Int
+countIncreases step = length . filter id . (zipWith (<) <*> drop step)
 
-solve2 = solve1 . slidingWindow
-  where
-    slidingWindow (x : xs@(y : z : _)) = (x + y + z) : slidingWindow xs
-    slidingWindow _ = []
-
-solve = solveDay parser solve1 solve2
+solve = solveDay parser (countIncreases 1) (countIncreases 3)
