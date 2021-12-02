@@ -34,7 +34,7 @@ skipDay _ = putStrLn "No solution"
 solveDay :: (Show b, Show c) => InputParser a -> (a -> b) -> (a -> c) -> DayRunner
 solveDay parser p1 p2 input = do
   d <- readInput input
-  let v = parseInput parser d
+  let !v = parseInput parser d
   start <- getMonotonicTime
   let !r1 = p1 v
   end1 <- getMonotonicTime
