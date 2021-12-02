@@ -20,7 +20,7 @@ parser = ParsecParser $ sepBy1 (up <|> down <|> forward) endOfLine
 move1 (h, v) (Depth i) = (h, v + i)
 move1 (h, v) (Forward i) = (h + i, v)
 
-solve1 steps = h * v where (h, v) = foldl move1 (0, 0) steps
+solve1 = uncurry (*) . foldl move1 (0, 0)
 
 move2 (h, v, a) (Depth i) = (h, v, a + i)
 move2 (h, v, a) (Forward i) = (h + i, v + a * i, a)
