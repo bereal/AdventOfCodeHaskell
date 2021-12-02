@@ -7,13 +7,13 @@ import Data.Text (Text)
 
 data Command = Depth Int | Forward Int
 
-cmd f name = f <$> (string name *> space *> decimal)
+cmd name = string name *> space *> decimal
 
-up = cmd (Depth . negate) "up"
+up = Depth . negate <$> cmd "up"
 
-down = cmd Depth "down"
+down = Depth <$> cmd "down"
 
-forward = cmd Forward "forward"
+forward = Forward <$> cmd "forward"
 
 parser = ParsecParser $ sepBy1 (up <|> down <|> forward) endOfLine
 
