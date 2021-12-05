@@ -2,10 +2,9 @@
 
 module Year2021.Day05 where
 
-import Common (Input, InputParser (ParsecParser), skipDay, solveDay)
+import Common (Input, InputParser (ParsecParser), solveDay)
 import Data.Attoparsec.Text (char, decimal, endOfLine, sepBy1, string)
 import qualified Data.Map as M
-import Data.Text (Text)
 
 type Point = (Int, Int)
 
@@ -22,16 +21,20 @@ parser = ParsecParser $ sepBy1 line endOfLine
 
 range a b = [a, a + signum (b - a) .. b]
 
-drawLine :: Bool -> Line -> [Point]
-drawLine useDiag ((x1, y1), (x2, y2))
-  | x1 == x2 = map (x1,) $ range y1 y2
-  | y1 == y2 = map (,y1) $ range x1 x2
-  | otherwise = if useDiag then zip (range x1 x2) (range y1 y2) else []
+draw1 v@((x1, y1), (x2, y2))
+  | x1 == x2 || y1 == y2 = draw2 v
+  | otherwise = []
 
-updateMap :: Map -> [Point] -> Map
-updateMap = foldl (\m p -> M.insertWith (+) p 1 m)
+draw2 ((x1, y1), (x2, y2)) = zip (range x1 x2) (range y1 y2)
 
-countIntersections :: Bool -> [Line] -> Int
-countIntersections useDiag = length . M.filter (> 1) . updateMap M.empty . concatMap (drawLine useDiag)
+fillMap :: [Point] -> Map
+fillMap = foldl (\m p -> M.insertWith (+) p 1 m) M.empty
 
-solve = solveDay parser (countIntersections False) (countIntersections True)
+countRepeats :: [Point] -> Int
+countRepeats = length . M.filter (> 1) . fillMap
+
+solve1 = countRepeats . concatMap draw1
+
+solve2 = countRepeats . concatMap draw2
+
+solve = solveDay parser solve1 solve2
