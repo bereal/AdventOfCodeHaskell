@@ -4,13 +4,11 @@ module Year2021.Day05 where
 
 import Common (Input, InputParser (ParsecParser), solveDay)
 import Data.Attoparsec.Text (char, decimal, endOfLine, sepBy1, string)
-import qualified Data.Map as M
+import qualified Data.HashMap.Strict as M
 
 type Point = (Int, Int)
 
 type Line = (Point, Point)
-
-type Map = M.Map Point Int
 
 point = (,) <$> decimal <* char ',' <*> decimal
 
@@ -27,11 +25,8 @@ draw1 v@((x1, y1), (x2, y2))
 
 draw2 ((x1, y1), (x2, y2)) = zip (range x1 x2) (range y1 y2)
 
-fillMap :: [Point] -> Map
-fillMap = foldl (\m p -> M.insertWith (+) p 1 m) M.empty
-
 countRepeats :: [Point] -> Int
-countRepeats = length . M.filter (> 1) . fillMap
+countRepeats = length . M.filter (> 1) . M.fromListWith (+) . map (,1)
 
 solve1 = countRepeats . concatMap draw1
 
