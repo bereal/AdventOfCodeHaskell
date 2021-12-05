@@ -4,7 +4,7 @@ module Year2021.Day05 where
 
 import Common (Input, InputParser (ParsecParser), solveDay)
 import Data.Attoparsec.Text (char, decimal, endOfLine, sepBy1, string)
-import qualified Data.HashMap.Strict as M
+import Data.List (group, sort)
 
 type Point = (Int, Int)
 
@@ -26,7 +26,7 @@ draw1 v@((x1, y1), (x2, y2))
 draw2 ((x1, y1), (x2, y2)) = zip (range x1 x2) (range y1 y2)
 
 countRepeats :: [Point] -> Int
-countRepeats = length . M.filter (> 1) . M.fromListWith (+) . map (,1)
+countRepeats = length . filter ((> 1) . length) . group . sort
 
 solve1 = countRepeats . concatMap draw1
 
