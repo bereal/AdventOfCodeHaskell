@@ -2,18 +2,14 @@
 
 module Year2021.Day06 where
 
-import Common (Input, InputParser (ParsecParser), solveDay)
+import Common (InputParser (ParsecParser), solveDay)
 import Data.Attoparsec.Text (char, decimal, sepBy1)
 import Data.List (group, sort)
 
 parser = ParsecParser $ sepBy1 decimal $ char ','
 
-next :: [Int] -> [Int]
-next (zeros : rest) =
-  let (prefix, [sevens, eights]) = splitAt 6 rest
-   in prefix ++ [sevens + zeros] ++ [eights, zeros]
+next [a, b, c, d, e, f, g, h, i] = [b, c, d, e, f, g, h + a, i, a]
 
-initCounter :: [Int] -> [Int]
 initCounter = map (pred . length) . group . sort . (++ [0 .. 8])
 
 run :: Int -> [Int] -> Int
