@@ -29,11 +29,18 @@ import Options.Applicative
 import System.Environment (getArgs)
 import Text.Printf (printf)
 import Text.Read (readEither)
+import qualified Year2016
 import qualified Year2019
 import qualified Year2020
 import qualified Year2021
 
-years = M.fromList [(2019, Year2019.days), (2020, Year2020.days), (2021, Year2021.days)]
+years =
+  M.fromList
+    [ (2016, Year2016.days),
+      (2019, Year2019.days),
+      (2020, Year2020.days),
+      (2021, Year2021.days)
+    ]
 
 run config inputPath year day = do
   let yearDays = years ! year
