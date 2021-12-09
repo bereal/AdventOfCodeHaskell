@@ -15,12 +15,14 @@ extra-source-files:
 
 dependencies:
   - base >= 4.7 && < 5
+  - array
   - attoparsec
   - bytestring
   - containers
   - directory
   - exceptions
   - filepath
+  - grid 
   - hashable
   - http-client
   - http-client-tls

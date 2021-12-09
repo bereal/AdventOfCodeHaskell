@@ -1,55 +1,52 @@
-{-# LANGUAGE ViewPatterns #-}
-
 module Year2021.Day09 where
 
 import Common (InputParser (ParsecParser), solveDay)
+import Data.Array (Array, indices, listArray, (!))
 import Data.Attoparsec.Text (digit, endOfInput, endOfLine, many1, sepBy1)
 import Data.Char (digitToInt)
 import Data.List (sort)
-import Data.Map ((!))
-import qualified Data.Map as M
 import Data.Set ((\\))
 import qualified Data.Set as S
+import Math.Geometry.Grid (Grid (neighbours))
+import Math.Geometry.Grid.Square (RectSquareGrid, rectSquareGrid)
 
-parser = ParsecParser $ sepBy1 (many1 (digitToInt <$> digit)) endOfLine
+parser = ParsecParser $ mkArea <$> sepBy1 (many1 (digitToInt <$> digit)) endOfLine
 
 type Point = (Int, Int)
 
-toMap :: [[Int]] -> M.Map Point Int
-toMap as = M.fromList [((row, col), n) | (r, row) <- zip as [0 ..], (n, col) <- zip r [0 ..], n /= 9]
+data Area = Area {points :: Array Point Int, grid :: RectSquareGrid} deriving (Show)
 
-toSet :: [[Int]] -> S.Set Point
-toSet = S.fromList . M.keys . toMap
+(!~) :: Area -> Point -> Int
+(!~) a p = points a ! p
 
-adjacent :: Point -> [Point]
-adjacent (x, y) = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+mkArea :: [[Int]] -> Area
+mkArea vs =
+  let bound@(h, w) = (length vs, length $ head vs)
+   in Area (listArray ((0, 0), (h -1, w -1)) $ concat vs) (rectSquareGrid w h)
 
-adjacentInSet s = filter (`S.member` s) . adjacent
+adjacent :: Area -> Point -> [Point]
+adjacent = neighbours . grid
 
-adjacentInMap m = filter (`M.member` m) . adjacent
+findLocalMinima area = filter (isLocalMinimum area) (indices $ points area)
 
-isLocalMinimum :: M.Map Point Int -> Point -> Bool
-isLocalMinimum m p = (m ! p) < minimum (map (m !) $ adjacentInMap m p)
+isLocalMinimum :: Area -> Point -> Bool
+isLocalMinimum m p = let v = (m !~ p) in all ((v <) . (m !~)) (adjacent m p)
 
-findBasin :: S.Set Point -> S.Set Point
-findBasin (S.null -> True) = S.empty
-findBasin m =
-  let sub seen ((`S.member` seen) -> True) = seen
-      sub seen n = find (S.insert n seen) n
-      find seen p = foldl sub seen $ adjacentInSet m p
-      start = S.elemAt 0 m
+findBasin :: Area -> Point -> S.Set Point
+findBasin a start =
+  let sub seen p
+        | (a !~ p) /= 9 && not (p `S.member` seen) = find (S.insert p seen) p
+        | otherwise = seen
+      find seen p = foldl sub seen $ adjacent a p
    in find (S.singleton start) start
 
-findAllBasins :: S.Set Point -> [S.Set Point]
-findAllBasins m =
-  let find s = let b = findBasin s in (b : find (s \\ b))
-   in takeWhile (not . S.null) $ find m
+findAllBasins :: Area -> [S.Set Point]
+findAllBasins a = map (findBasin a) $ findLocalMinima a
 
-solve1 inp =
-  let m = toMap inp
-      points = filter (isLocalMinimum m) (M.keys m)
-   in sum $ map ((+ 1) . (m !)) points
+solve1 area =
+  let ps = filter (isLocalMinimum area) (indices $ points area)
+   in sum $ map ((+ 1) . (area !~)) ps
 
-solve2 = product . take 3 . reverse . sort . map S.size . findAllBasins . toSet
+solve2 = product . take 3 . reverse . sort . map S.size . findAllBasins
 
 solve = solveDay parser solve1 solve2

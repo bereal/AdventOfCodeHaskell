@@ -3,7 +3,14 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: grid-7.8.15@sha256:7fc4a51062c8915e3301774242fbb74bdafcb959e1da17015d5fb1658890eb63,2289
+    pantry-tree:
+      size: 1880
+      sha256: a7003826456a83b2f312f1a81938d31a095218731a51afe828168dfb9ec08069
+  original:
+    hackage: grid-7.8.15@sha256:7fc4a51062c8915e3301774242fbb74bdafcb959e1da17015d5fb1658890eb63,2289
 snapshots:
 - completed:
     size: 587126
