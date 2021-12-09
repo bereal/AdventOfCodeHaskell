@@ -1,5 +1,7 @@
 {-# LANGUAGE ViewPatterns #-}
 
+-- See also branch 2021-09-grid for a solution with Math.Geometry.Grid
+
 module Year2021.Day09 where
 
 import Common (InputParser (ParsecParser), solveDay)
@@ -29,7 +31,7 @@ adjacentInSet s = filter (`S.member` s) . adjacent
 adjacentInMap m = filter (`M.member` m) . adjacent
 
 isLocalMinimum :: M.Map Point Int -> Point -> Bool
-isLocalMinimum m p = (m ! p) < minimum (map (m !) $ adjacentInMap m p)
+isLocalMinimum m p = let v = (m ! p) in all ((v <) . (m !)) $ adjacentInMap m p
 
 findBasin :: S.Set Point -> S.Set Point
 findBasin (S.null -> True) = S.empty
