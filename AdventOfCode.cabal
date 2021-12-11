@@ -69,7 +69,8 @@ library
       RecordWildCards
       ScopedTypeVariables
   build-depends:
-      attoparsec
+      array
+    , attoparsec
     , base >=4.7 && <5
     , bytestring
     , containers
@@ -80,6 +81,7 @@ library
     , http-client
     , http-client-tls
     , http-types
+    , multiset
     , optparse-applicative
     , split
     , template-haskell
@@ -99,6 +101,7 @@ executable AdventOfCode2021-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       AdventOfCode
+    , array
     , attoparsec
     , base >=4.7 && <5
     , bytestring
@@ -110,6 +113,7 @@ executable AdventOfCode2021-exe
     , http-client
     , http-client-tls
     , http-types
+    , multiset
     , optparse-applicative
     , split
     , template-haskell
