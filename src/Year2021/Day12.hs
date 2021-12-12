@@ -1,47 +1,47 @@
+{-# LANGUAGE ViewPatterns #-}
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+
 module Year2021.Day12 where
 
 import Common (InputParser (ParsecParser), solveDay)
 import Control.Applicative ((<|>))
-import Data.Attoparsec.Text (char, endOfLine, inClass, many1, satisfy, sepBy1, string)
-import Data.Map ((!))
-import qualified Data.Map as M
-import qualified Data.Set as S
-import Data.Text (Text, pack)
+import Data.Attoparsec.Text (char, endOfLine, letter, many1, sepBy1)
+import Data.Char (isAsciiUpper, ord)
+import Data.IntMap ((!))
+import qualified Data.IntMap as IM
+import qualified Data.IntSet as IS
 
-data Node = Start | End | Small Text | Large Text deriving (Eq, Ord)
+type Map = IM.IntMap [Int]
 
-type Map = M.Map Node [Node]
+type Memory = IS.IntSet
 
-type Memory = S.Set Node
+-- Large caves are odd, small caves are even
+nodeId "start" = 0
+nodeId "end" = -1
+nodeId s@(a : _) = let v = foldl1 ((+) . (* 0x100)) (map ord s) in 2 * v + fromEnum (isAsciiUpper a)
 
-textInClass s = pack <$> many1 (satisfy $ inClass s)
-
-node =
-  Start <$ string "start"
-    <|> End <$ string "end"
-    <|> Small <$> textInClass "a-z"
-    <|> Large <$> textInClass "A-Z"
+node = nodeId <$> many1 letter
 
 route = (,) <$> node <*> (char '-' *> node)
 
-mkMap :: [(Node, Node)] -> Map
-mkMap = M.fromListWith (++) . concatMap (\(a, b) -> [(a, [b]), (b, [a])])
+mkMap :: [(Int, Int)] -> Map
+mkMap = IM.fromListWith (++) . concatMap (\(a, b) -> [(a, [b]), (b, [a])])
 
 parser = ParsecParser $ mkMap <$> sepBy1 route endOfLine
 
-countPaths :: Node -> Memory -> Bool -> Map -> Int
+countPaths :: Int -> Memory -> Bool -> Map -> Int
 countPaths start mem allowRepeat m =
-  let choose Start = 0
-      choose End = 1
-      choose n@(Small _)
-        | (n `S.notMember` mem) = countPaths n (S.insert n mem) allowRepeat m
+  let choose 0 = 0
+      choose (-1) = 1
+      choose n@(even -> True)
+        | (n `IS.notMember` mem) = countPaths n (IS.insert n mem) allowRepeat m
         | allowRepeat = countPaths n mem False m
         | otherwise = 0
       choose n = countPaths n mem allowRepeat m
    in sum $ map choose (m ! start)
 
 solve' :: Bool -> Map -> Int
-solve' = countPaths Start S.empty
+solve' = countPaths 0 IS.empty
 
 solve1, solve2 :: Map -> Int
 solve1 = solve' False
