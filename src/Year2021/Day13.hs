@@ -45,7 +45,7 @@ update Y = second
 fold :: Paper -> (Axis, Int) -> Paper
 fold paper (axis, v) =
   let maxV = 2 * v
-      (top, bottom) = S.partition ((< v) . get axis) $ S.filter ((/= v) . get axis) paper
+      (top, bottom) = S.partition ((< v) . get axis) paper
       bottom' = S.map (update axis (maxV -)) bottom
    in top `S.union` bottom'
 
