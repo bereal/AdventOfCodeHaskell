@@ -4,7 +4,7 @@
 
 module Year2019.Day08 where
 
-import Common (Input, InputParser (ParsecParser, TextParser), solveDay)
+import Common (InputParser (ParsecParser, TextParser), ShowAsIs (ShowAsIs), solveDay)
 import Control.DeepSeq (NFData)
 import Data.Attoparsec.Text (digit, many1)
 import Data.Char (digitToInt)
@@ -16,13 +16,12 @@ width = 25
 
 height = 6
 
-newtype Image = Image [Int] deriving (Generic, NFData)
+type Image = [Int]
 
-instance Show Image where
-  show (Image pixels) = '\n' : (intercalate "\n" $ map (map showPixel) $ chunksOf width pixels)
-    where
-      showPixel 0 = ' '
-      showPixel 1 = '*'
+showImage pixels = ShowAsIs $ '\n' : (intercalate "\n" $ map (map showPixel) $ chunksOf width pixels) ++ "\n"
+  where
+    showPixel 0 = ' '
+    showPixel 1 = '*'
 
 parser = ParsecParser $ chunksOf (width * height) <$> many1 (digitToInt <$> digit)
 
@@ -44,6 +43,6 @@ solve1 ls =
       (z, o, t) = minimum stats
    in o * t
 
-solve2 = Image . foldl1 mergeLayers
+solve2 = showImage . foldl1 mergeLayers
 
 solve = solveDay parser solve1 solve2

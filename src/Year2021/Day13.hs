@@ -1,12 +1,11 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TupleSections #-}
-{-# LANGUAGE ViewPatterns #-}
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 module Year2021.Day13 where
 
-import Common (InputParser (ParsecParser), solveDay)
+import Common (InputParser (ParsecParser), ShowAsIs (ShowAsIs), solveDay)
 import Control.Applicative ((<|>))
 import Control.Arrow (first, second)
 import Control.DeepSeq (NFData)
@@ -17,23 +16,19 @@ import GHC.Generics (Generic)
 
 type Coord = (Int, Int)
 
-newtype Paper = Paper (S.Set Coord) deriving (Generic, NFData)
+type Paper = S.Set Coord
 
 data Axis = X | Y deriving (Generic, NFData)
 
-instance Show Paper where
-  show = showPaper
-
-showPaper (Paper dots) =
-  let (maxX, maxY) = foldl (\(a, b) (c, d) -> (max a c, max b d)) (0, 0) dots
-      itoc ((`S.member` dots) -> False) = '.'
-      itoc _ = '#'
+showPaper paper =
+  let (maxX, maxY) = foldl (\(a, b) (c, d) -> (max a c, max b d)) (0, 0) paper
+      itoc i = if i `S.member` paper then '#' else ' '
       row r = [itoc (i, r) | i <- [0 .. maxX]]
-   in "\n" ++ (intercalate "\n" [row r | r <- [0 .. maxY]]) ++ "\n"
+   in ShowAsIs $ "\n" ++ (intercalate "\n" [row r | r <- [0 .. maxY]]) ++ "\n"
 
 coord = (,) <$> (decimal <* char ',') <*> decimal
 
-paper = Paper . S.fromList <$> sepBy1 coord endOfLine
+paper = S.fromList <$> sepBy1 coord endOfLine
 
 foldParser = ((X,) <$> (string "x=" *> decimal)) <|> ((Y,) <$> (string "y=" *> decimal))
 
@@ -48,14 +43,14 @@ update X = first
 update Y = second
 
 fold :: Paper -> (Axis, Int) -> Paper
-fold (Paper dots) (axis, v) =
+fold paper (axis, v) =
   let maxV = 2 * v
-      (top, bottom) = S.partition ((< v) . get axis) $ S.filter ((/= v) . get axis) dots
+      (top, bottom) = S.partition ((< v) . get axis) $ S.filter ((/= v) . get axis) paper
       bottom' = S.map (update axis (maxV -)) bottom
-   in Paper $ top `S.union` bottom'
+   in top `S.union` bottom'
 
-solve1 (p, f : _) = let (Paper s) = fold p f in S.size s
+solve1 (p, f : _) = S.size $ fold p f
 
-solve2 (p, fs) = foldl fold p fs
+solve2 (p, fs) = showPaper $ foldl fold p fs
 
 solve = solveDay parser solve1 solve2

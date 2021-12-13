@@ -1,4 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Common where
 
@@ -8,11 +10,17 @@ import Data.Attoparsec.Text (Parser, parseOnly)
 import Data.Text (Text, pack)
 import qualified Data.Text.IO as IO
 import GHC.Clock (getMonotonicTime)
+import GHC.Generics (Generic)
 import Text.Printf (printf)
 
 data InputParser a = ParsecParser (Parser a) | TextParser (Text -> Either String a) | HardCoded a
 
 data Input = HTTPInput ClientConfig Int Int | FileInput FilePath
+
+newtype ShowAsIs = ShowAsIs String deriving (NFData, Generic)
+
+instance Show ShowAsIs where
+  show (ShowAsIs s) = s
 
 type DayRunner = Input -> IO ()
 
