@@ -19,6 +19,7 @@ dependencies:
   - attoparsec
   - bytestring
   - containers
+  - deepseq
   - directory
   - exceptions
   - filepath

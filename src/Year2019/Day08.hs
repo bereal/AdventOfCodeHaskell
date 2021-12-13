@@ -1,18 +1,22 @@
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 module Year2019.Day08 where
 
 import Common (Input, InputParser (ParsecParser, TextParser), solveDay)
+import Control.DeepSeq (NFData)
 import Data.Attoparsec.Text (digit, many1)
 import Data.Char (digitToInt)
 import Data.List (intercalate)
 import Data.List.Split (chunksOf)
+import GHC.Generics (Generic)
 
 width = 25
 
 height = 6
 
-newtype Image = Image [Int]
+newtype Image = Image [Int] deriving (Generic, NFData)
 
 instance Show Image where
   show (Image pixels) = '\n' : (intercalate "\n" $ map (map showPixel) $ chunksOf width pixels)
@@ -34,10 +38,11 @@ mergePixels 2 c = c
 
 mergeLayers = zipWith mergePixels
 
+solve1 :: [[Int]] -> Int
 solve1 ls =
   let stats = map getLayerStat ls
       (z, o, t) = minimum stats
-   in ((z, o, t), o * t)
+   in o * t
 
 solve2 = Image . foldl1 mergeLayers
 

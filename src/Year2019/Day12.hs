@@ -1,8 +1,11 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 module Year2019.Day12 where
 
 import Common (Input, InputParser (ParsecParser), solveDay)
+import Control.DeepSeq (NFData)
 import Data.Attoparsec.Text (Parser, char, decimal, endOfLine, sepBy1, signed, string)
 import Data.Map ((!?))
 import qualified Data.Map as M
@@ -10,10 +13,11 @@ import Data.Text (Text)
 import Data.Tuple.Select (sel1, sel2, sel3)
 import Data.Vector ((!), (//))
 import qualified Data.Vector as V
+import GHC.Generics (Generic)
 
 type Vector3D = (Int, Int, Int)
 
-data Moon = Moon {position :: Vector3D, velocity :: Vector3D} deriving (Show)
+data Moon = Moon {position :: Vector3D, velocity :: Vector3D} deriving (Show, Generic, NFData)
 
 num :: Parser Int
 num = signed decimal

@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TupleSections #-}
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
@@ -5,11 +7,13 @@
 module Year2021.Day04 where
 
 import Common (Input, InputParser (ParsecParser), solveDay)
+import Control.DeepSeq (NFData)
 import Data.Attoparsec.Text (char, decimal, endOfLine, many1, sepBy1, space)
 import Data.IntMap ((!?))
 import qualified Data.IntMap as IM
 import Data.List (partition)
 import Data.List.Split (chunksOf)
+import GHC.Generics (Generic)
 
 boardSize = 5
 
@@ -19,6 +23,7 @@ data Board = Board
     rows :: IM.IntMap Int,
     cols :: IM.IntMap Int
   }
+  deriving (Generic, NFData)
 
 mkBoard :: [Int] -> Board
 mkBoard nums =

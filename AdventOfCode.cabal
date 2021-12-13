@@ -74,6 +74,7 @@ library
     , base >=4.7 && <5
     , bytestring
     , containers
+    , deepseq
     , directory
     , exceptions
     , filepath
@@ -106,6 +107,7 @@ executable AdventOfCode2021-exe
     , base >=4.7 && <5
     , bytestring
     , containers
+    , deepseq
     , directory
     , exceptions
     , filepath

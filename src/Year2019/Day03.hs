@@ -37,6 +37,7 @@ unrollSegment (x, y) = replicate (abs x + abs y) (signum x, signum y)
 traceWire :: [(Int, Int)] -> [(Int, Int)]
 traceWire = tail . scanl add (0, 0) . concatMap unrollSegment
 
+solve1 :: ([(Int, Int)], [(Int, Int)]) -> Int
 solve1 (w1, w2) =
   let t1 = traceWire w1
       t2 = traceWire w2
@@ -44,6 +45,7 @@ solve1 (w1, w2) =
       dist = (\(x, y) -> abs x + abs y) <$> HS.toList intersections
    in minimum dist
 
+solve2 :: ([(Int, Int)], [(Int, Int)]) -> Int
 solve2 (w1, w2) =
   let t1 = traceWire w1
       t2 = traceWire w2

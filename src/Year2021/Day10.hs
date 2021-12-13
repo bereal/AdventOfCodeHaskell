@@ -1,13 +1,18 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 module Year2021.Day10 where
 
 import Common (InputParser (ParsecParser), solveDay)
+import Control.DeepSeq (NFData)
 import Data.Attoparsec.Text (char, choice, endOfLine, many1, sepBy1)
 import Data.Either (lefts, rights)
 import Data.List (sort)
+import GHC.Generics (Generic)
 
-data Bracket = Open Char | Close Char
+data Bracket = Open Char | Close Char deriving (Generic)
+
+instance NFData Bracket
 
 pair [o, c] = [Open <$> char o, Close o <$ char c]
 
@@ -29,10 +34,12 @@ errCost c = case c of '(' -> 3; '[' -> 57; '{' -> 1197; '<' -> 25137
 
 closingCost c = case c of '(' -> 1; '[' -> 2; '{' -> 3; '<' -> 4
 
+completionCost :: String -> Int
 completionCost = foldl (\a b -> 5 * a + closingCost b) 0
 
 middle xs = xs !! (length xs `div` 2)
 
+solve1 :: [[Bracket]] -> Int
 solve1 = sum . map errCost . lefts . map analyze
 
 solve2 = middle . sort . map completionCost . rights . map analyze

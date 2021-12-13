@@ -1,12 +1,16 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 module Year2019.Intcode where
 
+import Control.DeepSeq (NFData)
 import Data.IntMap ((!))
 import qualified Data.IntMap as IM
 import Data.Maybe (fromMaybe)
 import Debug.Trace (trace)
+import GHC.Generics (Generic)
 import Text.Printf (printf)
 
 type Memory = IM.IntMap Int
@@ -20,12 +24,13 @@ data ProgramState = ProgramState
     base :: Int,
     name :: String
   }
+  deriving (Generic, NFData)
 
 instance Show ProgramState where
   show ProgramState {name, state, input, ptr, base} =
     printf "Program %s {state %s, input %s, ptr %d, base %d}" name (show state) (show input) ptr base
 
-data State = Running | Halt | Waiting deriving (Eq, Show)
+data State = Running | Halt | Waiting deriving (Eq, Show, Generic, NFData)
 
 type AddrMode = Int
 

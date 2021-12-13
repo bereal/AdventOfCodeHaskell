@@ -1,11 +1,16 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
+
 module Year2021.Day02 where
 
 import Common (Input, InputParser (ParsecParser), solveDay)
 import Control.Applicative
+import Control.DeepSeq (NFData)
 import Data.Attoparsec.Text (Parser, decimal, endOfLine, sepBy1, space, string)
 import Data.Text (Text)
+import GHC.Generics (Generic)
 
-data Command = Depth Int | Forward Int
+data Command = Depth Int | Forward Int deriving (Generic, NFData)
 
 cmd name = string name *> space *> decimal
 

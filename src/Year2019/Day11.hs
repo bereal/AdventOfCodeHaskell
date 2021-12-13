@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TupleSections #-}
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
@@ -5,12 +7,14 @@
 module Year2019.Day11 where
 
 import Common (Input, InputParser (ParsecParser), skipDay, solveDay)
+import Control.DeepSeq (NFData)
 import Data.Attoparsec.Text (anyChar, char, decimal, many1, sepBy1, signed)
 import Data.List (intercalate)
 import Data.Map ((!?))
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
+import GHC.Generics (Generic)
 import Year2019.Intcode (ProgramState (ProgramState, output, state), State (Halt), initProgram, runProgramWithInput)
 
 parser = ParsecParser $ initProgram <$> sepBy1 (signed decimal) (char ',')
@@ -30,7 +34,7 @@ paint f =
       row r = map (cell . (,r)) [a .. c]
    in Image $ "\n" ++ intercalate "\n" (map row [b .. d])
 
-newtype Image = Image String
+newtype Image = Image String deriving (NFData, Generic)
 
 instance Show Image where
   show (Image s) = s
