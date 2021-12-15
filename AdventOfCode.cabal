@@ -84,6 +84,7 @@ library
     , http-types
     , multiset
     , optparse-applicative
+    , psqueues
     , split
     , template-haskell
     , text
@@ -117,6 +118,7 @@ executable AdventOfCode2021-exe
     , http-types
     , multiset
     , optparse-applicative
+    , psqueues
     , split
     , template-haskell
     , text

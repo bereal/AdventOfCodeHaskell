@@ -29,6 +29,7 @@ dependencies:
   - http-types
   - multiset
   - optparse-applicative
+  - psqueues
   - split
   - template-haskell
   - text
