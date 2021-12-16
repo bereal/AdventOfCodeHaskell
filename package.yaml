@@ -28,6 +28,7 @@ dependencies:
   - http-client-tls
   - http-types
   - multiset
+  - mtl
   - optparse-applicative
   - psqueues
   - split

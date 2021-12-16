@@ -82,6 +82,7 @@ library
     , http-client
     , http-client-tls
     , http-types
+    , mtl
     , multiset
     , optparse-applicative
     , psqueues
@@ -116,6 +117,7 @@ executable AdventOfCode2021-exe
     , http-client
     , http-client-tls
     , http-types
+    , mtl
     , multiset
     , optparse-applicative
     , psqueues
