@@ -14,8 +14,9 @@ import Control.Monad.State
     when,
   )
 import Data.Attoparsec.Text (digit, letter, many1)
-import Data.Bits (shift)
-import Data.Functor (($>), (<&>))
+import Data.Bits (shift, (.&.))
+import Data.Char (digitToInt)
+import Data.Functor (($>))
 
 data Header = Header {version :: Int, typeId :: Int}
 
@@ -30,22 +31,8 @@ type BitReader = State BitStream
 hexToBits :: String -> [Int]
 hexToBits = concatMap bits
   where
-    bits '0' = [0, 0, 0, 0]
-    bits '1' = [0, 0, 0, 1]
-    bits '2' = [0, 0, 1, 0]
-    bits '3' = [0, 0, 1, 1]
-    bits '4' = [0, 1, 0, 0]
-    bits '5' = [0, 1, 0, 1]
-    bits '6' = [0, 1, 1, 0]
-    bits '7' = [0, 1, 1, 1]
-    bits '8' = [1, 0, 0, 0]
-    bits '9' = [1, 0, 0, 1]
-    bits 'A' = [1, 0, 1, 0]
-    bits 'B' = [1, 0, 1, 1]
-    bits 'C' = [1, 1, 0, 0]
-    bits 'D' = [1, 1, 0, 1]
-    bits 'E' = [1, 1, 1, 0]
-    bits 'F' = [1, 1, 1, 1]
+    bit n i = (n `shift` (- i)) .&. 1
+    bits n = map (bit $ digitToInt n) [3, 2, 1, 0]
 
 bitsToInt :: [Int] -> Int
 bitsToInt = foldl ((+) . (`shift` 1)) 0
@@ -77,6 +64,7 @@ readLength = do
   inPackets <- readBool
   if inPackets then InPackets <$> readInt 11 else InBits <$> readInt 15
 
+readLiteral :: BitReader Int
 readLiteral = nibblesToInt <$> read'
   where
     read' = do
