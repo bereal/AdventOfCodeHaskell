@@ -45,14 +45,17 @@ bitsToInt = foldl ((+) . (`shift` 1)) 0
 
 neighbours (a, b) = [(a + i, b + j) | i <- [-1 .. 1], j <- [-1 .. 1]]
 
-closure :: S.HashSet Cell -> S.HashSet Cell
-closure cells = S.fromList $ concatMap neighbours $ S.toList cells
+closure :: S.HashSet Cell -> [(Int, Int)]
+closure s =
+  let (mina, minb, maxa, maxb) =
+        foldl (\(mina, minb, maxa, maxb) (a, b) -> (min mina a, min minb b, max maxa a, max maxb b)) (0, 0, 0, 0) $ S.toList s
+   in [(a, b) | a <- [mina - 1 .. maxa + 1], b <- [minb - 1 .. maxb + 1]]
 
 expand :: Code -> Image -> Image
 expand code img@Image {..} =
   let cells' = closure cells
       update cell = (code ! (img !~ cell)) == inverted
-      updated = S.filter update cells'
+      updated = S.fromList $ filter update cells'
    in Image updated (not inverted)
 
 expandAndCount code img steps = S.size $ cells $ iterate (expand code) img !! steps
