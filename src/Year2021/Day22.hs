@@ -9,7 +9,8 @@ import Common (Input, InputParser (ParsecParser), skipDay, solveDay)
 import Control.Applicative ((<|>))
 import Control.DeepSeq (NFData)
 import Data.Attoparsec.Text (Parser, anyChar, char, decimal, endOfInput, endOfLine, letter, many1, sepBy1, signed, string)
-import Data.Maybe (fromJust, isJust)
+import Data.HashSet as S
+import Data.Maybe (fromJust, isJust, mapMaybe)
 import Data.Text (Text)
 import GHC.Generics (Generic)
 
@@ -38,8 +39,22 @@ cutRange (a, b)
   | a > 50 = Nothing
   | otherwise = Just (max a (-50), min b 50)
 
--- cutCube :: Cube -> Maybe Cube
+cutCube :: Cube -> Maybe Cube
+cutCube (a, b, c) = case (cutRange a, cutRange b, cutRange c) of
+  (Just a, Just b, Just c) -> Just (a, b, c)
+  _ -> Nothing
 
--- filterCommands = map (fromJust <$>) . filter (isJust . snd) . map (cutRange <$>)
+cutCmd :: Command -> Maybe Command
+cutCmd (v, c) = (v,) <$> cutCube c
 
-solve = solveDay parser id id
+enumCube :: Cube -> S.HashSet (Int, Int, Int)
+enumCube ((a1, a2), (b1, b2), (c1, c2)) = S.fromList [(a, b, c) | a <- [a1 .. a2], b <- [b1 .. b2], c <- [c1 .. c2]]
+
+solve1 cmds =
+  let cs = mapMaybe cutCmd cmds
+      upd s (True, cube) = S.union s (enumCube cube)
+      upd s (False, cube) = S.difference s (enumCube cube)
+      s = foldl upd S.empty cs
+   in S.size s
+
+solve = solveDay parser solve1 (const (0 :: Int))
