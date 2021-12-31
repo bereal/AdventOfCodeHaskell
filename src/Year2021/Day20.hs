@@ -47,16 +47,17 @@ neighbours (a, b) = [(a + i, b + j) | i <- [-1 .. 1], j <- [-1 .. 1]]
 
 closure :: S.HashSet Cell -> [(Int, Int)]
 closure s =
-  let (mina, minb, maxa, maxb) =
-        foldl (\(mina, minb, maxa, maxb) (a, b) -> (min mina a, min minb b, max maxa a, max maxb b)) (0, 0, 0, 0) $ S.toList s
-   in [(a, b) | a <- [mina - 1 .. maxa + 1], b <- [minb - 1 .. maxb + 1]]
+  let upd (a1, a2, b1, b2) (a, b) = (min a1 a, max a2 a, min b1 b, max b2 b)
+      (a1, a2, b1, b2) = foldl upd (0, 0, 0, 0) $ S.toList s
+   in [(a, b) | a <- [a1 - 1 .. a2 + 1], b <- [b1 - 1 .. b2 + 1]]
 
 expand :: Code -> Image -> Image
 expand code img@Image {..} =
   let cells' = closure cells
-      update cell = (code ! (img !~ cell)) == inverted
+      inverted' = code ! 0 /= inverted
+      update cell = (code ! (img !~ cell)) /= inverted'
       updated = S.fromList $ filter update cells'
-   in Image updated (not inverted)
+   in Image updated inverted'
 
 expandAndCount code img steps = S.size $ cells $ iterate (expand code) img !! steps
 
