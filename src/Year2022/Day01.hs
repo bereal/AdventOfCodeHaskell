@@ -1,8 +1,7 @@
 module Year2022.Day01 where
 
 import Common (InputParser (ParsecParser), solveDay)
-import Data.Attoparsec.Text (decimal, endOfLine, sepBy1, string)
-import qualified Data.Text as T
+import Data.Attoparsec.Text (decimal, endOfLine, sepBy1)
 import Data.List (sort)
 
 parser = ParsecParser $ map sum <$> sepBy1 (sepBy1 decimal endOfLine) (endOfLine *> endOfLine)
