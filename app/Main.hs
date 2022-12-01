@@ -33,13 +33,15 @@ import qualified Year2016
 import qualified Year2019
 import qualified Year2020
 import qualified Year2021
+import qualified Year2022
 
 years =
   M.fromList
     [ (2016, Year2016.days),
       (2019, Year2019.days),
       (2020, Year2020.days),
-      (2021, Year2021.days)
+      (2021, Year2021.days),
+      (2022, Year2022.days)
     ]
 
 run config inputPath year day = do
