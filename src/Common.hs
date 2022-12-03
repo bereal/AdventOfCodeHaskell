@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
@@ -14,6 +13,11 @@ import GHC.Generics (Generic)
 import Text.Printf (printf)
 
 data InputParser a = ParsecParser (Parser a) | TextParser (Text -> Either String a) | HardCoded a
+
+instance Functor InputParser where
+  fmap f (ParsecParser p) = ParsecParser $ f <$> p
+  fmap f (TextParser p) = TextParser (fmap f . p)
+  fmap f (HardCoded a) = HardCoded $ f a
 
 data Input = HTTPInput ClientConfig Int Int | FileInput FilePath
 
