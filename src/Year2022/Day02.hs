@@ -1,17 +1,16 @@
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 module Year2022.Day02 where
 
-import Common (InputParser (ParsecParser), solveDay)
+import Common (solveDay, lineParser)
 import Control.Applicative ((<|>))
 import Data.Attoparsec.Text (endOfLine, sepBy1, inClass, satisfy, space)
 
-parseMove = p "AX" 1 <|> p "BY" 2 <|> p "CZ" 3 where
+parseMove = p "AX" (1::Int) <|> p "BY" 2 <|> p "CZ" 3 where
     p s m = m <$ satisfy (inClass s)
 
 parseRound = (,) <$> (parseMove <* space) <*> parseMove
 
-parser :: InputParser [(Int, Int)]
-parser = ParsecParser $ sepBy1 parseRound endOfLine
+parser = lineParser parseRound
 
 roundScore (1, 2) = 8
 roundScore (2, 3) = 9

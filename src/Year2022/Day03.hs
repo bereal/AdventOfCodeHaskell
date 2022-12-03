@@ -1,13 +1,12 @@
 module Year2022.Day03 where
 
-import Common (InputParser (ParsecParser), solveDay)
-import Data.Attoparsec.Text (endOfLine, sepBy1, many1, letter)
+import Common (solveDay, lineParser)
+import Data.Attoparsec.Text (many1, letter)
 import Data.Char (ord, isAsciiLower)
 import Data.List (intersect)
 import Data.List.Split (chunksOf)
 
-parser :: InputParser [String]
-parser = ParsecParser $ sepBy1 (many1 letter) endOfLine
+parser = lineParser $ many1 letter
 
 priority a | isAsciiLower a = ord a - ord 'a' + 1
            | otherwise = ord a - ord 'A' + 27

@@ -6,7 +6,7 @@ module Common where
 
 import Client (ClientConfig, downloadInput)
 import Control.DeepSeq (NFData, deepseq)
-import Data.Attoparsec.Text (Parser, parseOnly)
+import Data.Attoparsec.Text (Parser, parseOnly, sepBy1, many1, anyChar, endOfLine)
 import Data.Text (Text, pack)
 import qualified Data.Text.IO as IO
 import GHC.Clock (getMonotonicTime)
@@ -37,6 +37,9 @@ parseInput parser input =
    in case result of
         Left err -> error err
         Right a -> a
+
+lineParser :: Parser a -> InputParser [a]
+lineParser p = ParsecParser $ sepBy1 p endOfLine
 
 skipDay _ = putStrLn "No solution"
 
