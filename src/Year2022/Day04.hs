@@ -15,4 +15,5 @@ intersects ((a, b), (c, d)) = a <= d && b >= c
 
 count f = length . filter f
 
+
 solve = solveDay parser (count includes) (count intersects)
