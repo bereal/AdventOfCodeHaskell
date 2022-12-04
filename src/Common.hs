@@ -5,7 +5,7 @@ module Common where
 
 import Client (ClientConfig, downloadInput)
 import Control.DeepSeq (NFData, deepseq)
-import Data.Attoparsec.Text (Parser, parseOnly, sepBy1, many1, anyChar, endOfLine)
+import Data.Attoparsec.Text (Parser, parseOnly, sepBy1, endOfLine)
 import Data.Text (Text, pack)
 import qualified Data.Text.IO as IO
 import GHC.Clock (getMonotonicTime)

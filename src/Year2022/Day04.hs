@@ -1,12 +1,13 @@
 module Year2022.Day04 where
 
-import Common (solveDay, lineParser)
+import Common (InputParser, solveDay, lineParser)
 import Data.Attoparsec.Text (Parser, decimal, char)
 
-range :: Parser (Int, Int)
-range = (,) <$> decimal <*> (char '-' *> decimal)
+pair p sep = (,) <$> (p <* char sep) <*> p
 
-parser = lineParser $ (,) <$> range <*> (char ',' *> range)
+parser :: InputParser [((Int, Int), (Int, Int))]
+parser = lineParser $ pair range ','
+    where range = pair decimal '-'
 
 includes ((a, b), (c, d)) = a <= c && b >= d || a >= c && b <= d
 
