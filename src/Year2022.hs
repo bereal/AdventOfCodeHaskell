@@ -5,11 +5,14 @@ import qualified Year2022.Day02 as Day02
 import qualified Year2022.Day03 as Day03
 import qualified Year2022.Day04 as Day04
 import qualified Year2022.Day05 as Day05
+import qualified Year2022.Day06 as Day06
+
 
 days =
   [ Day01.solve,
     Day02.solve,
     Day03.solve,
     Day04.solve,
-    Day05.solve
+    Day05.solve,
+    Day06.solve
   ]
