@@ -1,11 +1,7 @@
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 module Year2022.Day08 where
-import Common (lineParser, solveDay, skipPart)
+import Common (lineParser, solveDay)
 import Data.Attoparsec.Text (Parser, digit, many1)
-import qualified Data.Map as M
-import Data.List (sort, transpose)
-import Control.Monad.State
+import Data.List (transpose)
 import Data.Char (digitToInt)
 import Data.Tuple (swap)
 import qualified Data.Set as S
@@ -31,9 +27,24 @@ findVisible :: [[Int]] -> [(Int, Int)]
 findVisible grid = f grid ++ map swap (f $ transpose grid)
     where f = concat . zipWith (map . (,)) [1..] . findVisibleIndicesInRows
 
+countLeftVisibility :: [Int] -> [Int]
+countLeftVisibility row = reverse $ snd $ foldl cv ([9], []) $ tail $ init row where
+    cv (hist, buf) i = let v = length $ takeWhile (< i) hist in (i:hist, (v+1):buf)
+
+countVisibilityInRow :: [Int] -> [(Int, Int)]
+countVisibilityInRow row = zip (countLeftVisibility row) (reverse $ countLeftVisibility $ reverse row)
+
+countVisibility :: [[Int]] -> [[(Int, Int)]]
+countVisibility = map countVisibilityInRow . tail . init
+
 solve1 grid = let
         w = length $ head grid
         h = length grid
     in (h + w) * 2 - 4 + S.size (S.fromList $ findVisible grid)
 
-solve = solveDay parser solve1 skipPart
+solve2 grid = let
+    rv = concat $ countVisibility grid
+    cv = concat $ transpose $ countVisibility $ transpose grid
+ in maximum $ zipWith (\(a, b) (c, d) -> a * b * c * d) rv cv
+
+solve = solveDay parser solve1 solve2
