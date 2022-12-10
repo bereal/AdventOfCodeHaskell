@@ -70,6 +70,7 @@ library
       Year2022.Day06
       Year2022.Day07
       Year2022.Day08
+      Year2022.Day09
       Year2022.Day10
   other-modules:
       Paths_AdventOfCode
