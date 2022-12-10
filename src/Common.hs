@@ -47,6 +47,8 @@ lineParser p = ParsecParser $ sepBy1 p endOfLine
 
 skipDay _ = putStrLn "No solution"
 
+skipPart = const (ShowAsIs "No solution")
+
 solveDay :: (Show b, Show c, NFData a, NFData b, NFData c) => InputParser a -> (a -> b) -> (a -> c) -> DayRunner
 solveDay parser p1 p2 input = do
   d <- readInput input
