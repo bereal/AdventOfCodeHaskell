@@ -6,18 +6,19 @@ module Common where
 import Client (ClientConfig, downloadInput)
 import Control.DeepSeq (NFData, deepseq)
 import Data.Attoparsec.Text (Parser, parseOnly, sepBy1, endOfLine)
-import Data.Text (Text, pack)
+import Data.Text (Text, pack, unpack)
 import qualified Data.Text.IO as IO
 import GHC.Clock (getMonotonicTime)
 import GHC.Generics (Generic)
 import Text.Printf (printf)
 
-data InputParser a = ParsecParser (Parser a) | TextParser (Text -> Either String a) | HardCoded a
+data InputParser a = ParsecParser (Parser a) | TextParser (Text -> Either String a) | HardCoded a | StringParser (String -> Either String a)
 
 instance Functor InputParser where
   fmap f (ParsecParser p) = ParsecParser $ f <$> p
   fmap f (TextParser p) = TextParser (fmap f . p)
   fmap f (HardCoded a) = HardCoded $ f a
+  fmap f (StringParser p) = StringParser(fmap f . p)
 
 data Input = HTTPInput ClientConfig Int Int | FileInput FilePath
 
@@ -38,6 +39,7 @@ parseInput parser input =
         (ParsecParser p) -> parseOnly p input
         (TextParser p) -> p input
         (HardCoded a) -> Right a
+        (StringParser p) -> p $ unpack input
    in case result of
         Left err -> error err
         Right a -> a

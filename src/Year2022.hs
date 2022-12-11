@@ -10,6 +10,7 @@ import qualified Year2022.Day07 as Day07
 import qualified Year2022.Day08 as Day08
 import qualified Year2022.Day09 as Day09
 import qualified Year2022.Day10 as Day10
+import qualified Year2022.Day11 as Day11
 import Common (skipDay)
 
 
@@ -23,5 +24,6 @@ days =
     Day07.solve,
     Day08.solve,
     Day09.solve,
-    Day10.solve
+    Day10.solve,
+    Day11.solve
   ]
