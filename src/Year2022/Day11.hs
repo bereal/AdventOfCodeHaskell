@@ -79,7 +79,7 @@ solve' reduce rounds = product . take 2 . reverse . sort . map inspected .
     M.elems . (!!rounds) . iterate (processRound reduce) . M.fromAscList . zip [0..]
 
 solve1 = solve' (`div` 3) 20
-solve2 monkeys = let m = product $ map divisor monkeys
+solve2 monkeys = let m = foldl1 lcm $ map divisor monkeys
     in solve' (`mod` m) 10000 monkeys
 
 solve = solveDay parser solve1 solve2
