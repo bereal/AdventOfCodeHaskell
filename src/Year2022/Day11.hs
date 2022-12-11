@@ -16,12 +16,12 @@ getInts s = map read (getAllTextMatches (s =~ ("[0-9]+" :: String)) :: [String])
 
 getInt = head . getInts
 
-data Expr = Const Integer | Old deriving (Show, NFData, Generic)
+data Expr = Const Int | Old deriving (Show, NFData, Generic)
 
 data Monkey = Monkey {
-    items :: [Integer],
+    items :: [Int],
     operation :: (Char, Expr),
-    divisor :: Integer,
+    divisor :: Int,
     ifTrue :: Int,
     ifFalse :: Int,
     inspected :: Int
@@ -34,9 +34,9 @@ parseOperation s = f (s =~ ("(\\*|\\+) (old|[0-9]+)" :: String) :: (String, Stri
 
 parseMonkey :: [String] -> Monkey
 parseMonkey [_, itemsS, opS, divS, trueS, falseS] = Monkey
-    (map toInteger $ getInts itemsS)
+    (getInts itemsS)
     (parseOperation opS)
-    (toInteger $ getInt divS)
+    (getInt divS)
     (getInt trueS)
     (getInt falseS)
     0
@@ -49,30 +49,30 @@ type State = M.IntMap Monkey
 eraseItems :: Monkey -> Monkey
 eraseItems m@Monkey{..} = m {items=[], inspected=inspected + length items}
 
-evalExpr :: Integer -> Expr -> Integer
+evalExpr :: Int -> Expr -> Int
 evalExpr i Old = i
 evalExpr _ (Const j) = j
 
-evalOp :: Integer -> (Char, Expr) -> Integer
+evalOp :: Int -> (Char, Expr) -> Int
 evalOp i ('*', exp) = i * evalExpr i exp
 evalOp i ('+', exp) = i + evalExpr i exp
 
-addItem :: Integer -> Monkey -> Monkey
+addItem :: Int -> Monkey -> Monkey
 addItem i m@Monkey{..} = m {items=items ++ [i]}
 
-processItem :: (Integer -> Integer) -> Monkey -> State -> Integer -> State
+processItem :: (Int -> Int) -> Monkey -> State -> Int -> State
 processItem reduce m@Monkey{..} st i = let
     new = reduce $ i `evalOp` operation
     target = if new `mod` divisor == 0 then ifTrue else ifFalse
   in M.adjust (addItem new) target st
 
-processMonkey :: (Integer -> Integer) ->  State -> Int -> State
+processMonkey :: (Int -> Int) ->  State -> Int -> State
 processMonkey reduce st i = let
     m@Monkey{..} = st ! i
     st' = foldl (processItem reduce m) st items
   in M.adjust eraseItems i st'
 
-processRound :: (Integer -> Integer) -> State -> State
+processRound :: (Int -> Int) -> State -> State
 processRound reduce st = foldl (processMonkey reduce) st $ M.keys st
 
 solve' reduce rounds = product . take 2 . reverse . sort . map inspected .
