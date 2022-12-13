@@ -27,9 +27,7 @@ instance Ord Packet where
         v -> v
     compare a@(List _) b = compare a $ List [b]
     compare a b@(List _) = compare (List [a]) b
-    compare (Val a) (Val b) = if | a < b -> LT
-                                 | a > b -> GT
-                                 | otherwise -> EQ
+    compare (Val a) (Val b) = compare a b
 
 solve1 :: [(Packet, Packet)] -> Int
 solve1 = sum . map fst . filter (snd . second (uncurry (<))) . zip [1..]
