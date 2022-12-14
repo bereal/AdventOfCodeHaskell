@@ -47,6 +47,9 @@ library:
     - OverloadedStrings
     - RecordWildCards
     - ScopedTypeVariables
+    - TupleSections
+    - DeriveAnyClass
+    - DeriveGeneric
 
 executables:
   AdventOfCode2021-exe:
