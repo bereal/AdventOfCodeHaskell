@@ -1,6 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
 module Common where
 
 import Client (ClientConfig, downloadInput)
@@ -33,7 +30,7 @@ readInput :: Input -> IO Text
 readInput (HTTPInput config year day) = downloadInput config year day
 readInput (FileInput path) = IO.readFile path
 
-parseInput :: NFData a => InputParser a -> Text -> a
+parseInput :: InputParser a -> Text -> a
 parseInput parser input =
   let result = case parser of
         (ParsecParser p) -> parseOnly p input
