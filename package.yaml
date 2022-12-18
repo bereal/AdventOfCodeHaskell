@@ -22,6 +22,7 @@ dependencies:
   - deepseq
   - directory
   - exceptions
+  - extra
   - filepath
   - hashable
   - http-client
