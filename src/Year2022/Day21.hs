@@ -1,13 +1,13 @@
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 module Year2022.Day21 where
-import Common (solveDay, lineParser)
 import GHC.Generics (Generic)
 import Control.DeepSeq (NFData)
-import qualified Data.HashMap.Strict as HM
-import Data.HashMap.Strict ((!))
-import Data.Text
+import Data.Text (Text, pack)
 import Control.Applicative ((<|>))
 import Data.Attoparsec.Text (decimal, letter, many1, anyChar, space, string)
+import qualified Data.HashMap.Strict as HM
+import Data.HashMap.Strict ((!))
+import Common (solveDay, lineParser)
 
 data Expr = Val Int | Op Text Char Text deriving (Show, Generic, NFData)
 
@@ -36,17 +36,17 @@ data Equation = Const Int | Solver (Int -> Int)
 
 (.>.) g (Solver f) = Solver $ f . g
 
-equation op (Const a) (Const b)     = Const $ evalOp op a b
-equation '*' (Const a) s            = (`div` a)  .>. s
-equation '*' s (Const a)            = (`div` a)  .>. s
-equation '/' (Const a) s            = (a `div`)  .>. s
-equation '/' s@(Solver f) (Const a) = (a *)      .>. s
-equation '+' (Const a) s            = subtract a .>. s
-equation '+' s (Const a)            = subtract a .>. s
-equation '-' (Const a) s            = (a -)      .>. s
-equation '-' s (Const a)            = (a +)      .>. s
-equation '=' (Solver f) (Const a)   = Const $ f a
-equation '=' (Const a) (Solver f)   = Const $ f a
+equation op  (Const a)  (Const b)  = Const $ evalOp op a b
+equation '*' (Const a)  s          = (`div` a)  .>. s
+equation '*' s          (Const a)  = (`div` a)  .>. s
+equation '/' (Const a)  s          = (a `div`)  .>. s
+equation '/' s          (Const a)  = (a *)      .>. s
+equation '+' (Const a)  s          = subtract a .>. s
+equation '+' s          (Const a)  = subtract a .>. s
+equation '-' (Const a)  s          = (a -)      .>. s
+equation '-' s          (Const a)  = (a +)      .>. s
+equation '=' (Solver f) (Const a)  = Const $ f a
+equation '=' (Const a)  (Solver f) = Const $ f a
 
 buildEquation :: NS -> Text -> Equation
 buildEquation _ "humn" = Solver id
@@ -55,8 +55,7 @@ buildEquation ns n = case ns ! n of
     Op left op right -> let
         le = buildEquation ns left
         re = buildEquation ns right
-        op' = if n == "root" then '=' else op
-     in equation op' le re
+     in equation op le re
 
 solve1 = eval "root"
 
