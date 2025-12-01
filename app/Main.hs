@@ -35,6 +35,7 @@ import qualified Year2019
 import qualified Year2020
 import qualified Year2021
 import qualified Year2022
+import qualified Year2025
 
 years =
   M.fromList
@@ -43,7 +44,8 @@ years =
       (2019, Year2019.days),
       (2020, Year2020.days),
       (2021, Year2021.days),
-      (2022, Year2022.days)
+      (2022, Year2022.days),
+      (2025, Year2025.days)
     ]
 
 run config inputPath year day = do
@@ -61,7 +63,7 @@ data ParsedFlags = ParsedFlags
     fInput :: Maybe String
   }
 
-optionalReader :: Read a => ReadM (Maybe a)
+optionalReader :: (Read a) => ReadM (Maybe a)
 optionalReader = eitherReader (fmap Just . readEither)
 
 flagParser :: Parser ParsedFlags
@@ -70,9 +72,9 @@ flagParser =
     <$> optional
       ( strOption (short 'b' <> long "basedir" <> metavar "DIRECTORY")
       )
-      <*> option auto (short 'y' <> long "year" <> value 2021 <> metavar "YEAR")
-      <*> option optionalReader (short 'd' <> long "day" <> value Nothing <> metavar "DAY")
-      <*> optional (strOption (short 'i' <> long "input" <> metavar "INPUT_FILE"))
+    <*> option auto (short 'y' <> long "year" <> value 2021 <> metavar "YEAR")
+    <*> option optionalReader (short 'd' <> long "day" <> value Nothing <> metavar "DAY")
+    <*> optional (strOption (short 'i' <> long "input" <> metavar "INPUT_FILE"))
 
 parseFlags = do
   args <- getArgs
