@@ -2,7 +2,7 @@ module Common where
 
 import Client (ClientConfig, downloadInput)
 import Control.DeepSeq (NFData, deepseq)
-import Data.Attoparsec.Text (Parser, parseOnly, sepBy1, endOfLine)
+import Data.Attoparsec.Text (Parser, endOfLine, parseOnly, sepBy1)
 import Data.Text (Text, pack, unpack)
 import qualified Data.Text.IO as IO
 import GHC.Clock (getMonotonicTime)
@@ -15,7 +15,7 @@ instance Functor InputParser where
   fmap f (ParsecParser p) = ParsecParser $ f <$> p
   fmap f (TextParser p) = TextParser (fmap f . p)
   fmap f (HardCoded a) = HardCoded $ f a
-  fmap f (StringParser p) = StringParser(fmap f . p)
+  fmap f (StringParser p) = StringParser (fmap f . p)
 
 data Input = HTTPInput ClientConfig Int Int | FileInput FilePath
 
@@ -28,7 +28,7 @@ type DayRunner = Input -> IO ()
 
 readInput :: Input -> IO Text
 readInput (HTTPInput config year day) = downloadInput config year day
-readInput (FileInput path) = IO.readFile path
+readInput (FileInput path) = if path == "-" then pack <$> getContents else IO.readFile path
 
 parseInput :: InputParser a -> Text -> a
 parseInput parser input =
