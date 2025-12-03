@@ -8,22 +8,22 @@ range = (,) <$> decimal <* char '-' <*> decimal
 parser :: InputParser [(Int, Int)]
 parser = ParsecParser $ sepBy1 range $ char ','
 
-isBad1 n =
-  let s = show n
-      (l, r) = length s `divMod` 2
-   in ((r == 0) && uncurry (==) (splitAt l s))
-
-getDivisors n = filter (\d -> n `mod` d == 0) [1 .. n - 1]
-
 times n = concat . replicate n
 
-isBad2 n =
+isBad :: (Int -> [Int]) -> Int -> Bool
+isBad divisors n =
   let s = show n
       len = length s
       check d = s == (len `div` d) `times` take d s
-      ds = getDivisors len
+      ds = divisors len
    in any check ds
 
-solve' isBad = let f (a, b) = filter isBad [a .. b] in sum . concatMap f
+solve' divisors =
+  let f (a, b) = filter (isBad divisors) [a .. b]
+   in sum . concatMap f
 
-solve = solveDay parser (solve' isBad1) (solve' isBad2)
+solve1 = solve' $ \n -> let (d, r) = n `divMod` 2 in [d | r == 0]
+
+solve2 = solve' $ \n -> filter ((== 0) . mod n) [1 .. n - 1]
+
+solve = solveDay parser solve1 solve2
