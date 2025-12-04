@@ -29,6 +29,7 @@ import Options.Applicative
 import System.Environment (getArgs)
 import Text.Printf (printf)
 import Text.Read (readEither)
+import qualified Year2015
 import qualified Year2016
 import qualified Year2018
 import qualified Year2019
@@ -40,14 +41,15 @@ import qualified Year2025
 
 years =
   M.fromList
-    [ (2016, Year2016.days),
+    [ (2015, Year2015.days),
+      (2016, Year2016.days),
       (2018, Year2018.days),
       (2019, Year2019.days),
       (2020, Year2020.days),
       (2021, Year2021.days),
       (2022, Year2022.days),
-      (2025, Year2025.days),
-      (2024, Year2024.days)
+      (2024, Year2024.days),
+      (2025, Year2025.days)
     ]
 
 run config inputPath year day = do
