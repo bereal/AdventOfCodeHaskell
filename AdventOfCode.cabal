@@ -87,6 +87,7 @@ library
       Year2025.Day01
       Year2025.Day02
       Year2025.Day03
+      Year2025.Day04
   other-modules:
       Paths_AdventOfCode
   hs-source-dirs:
